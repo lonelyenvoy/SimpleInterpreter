@@ -1,7 +1,7 @@
 package exception;
 
-public class RuntimeInternalError extends Throwable {
+public class RuntimeInternalError extends RuntimeException {
     public RuntimeInternalError(String message) {
-        super(message);
+        super("RuntimeInternalError: " + message);
     }
 }

@@ -15,10 +15,10 @@ public class Assert {
     public void orThrows(Class exceptionClass, String message) {
         if (ok) return;
         try {
-            exceptionClass.getDeclaredConstructor(exceptionClass).newInstance(message);
+            Object exception = exceptionClass.getDeclaredConstructor(String.class).newInstance(message);
+            throw (RuntimeException) exception;
         } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
-            throw new Error();
         }
     }
 }

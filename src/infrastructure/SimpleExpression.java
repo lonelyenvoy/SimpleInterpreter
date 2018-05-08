@@ -43,7 +43,7 @@ public class SimpleExpression {
             SimpleExpression first = children.get(0);
             if (first.value.equals("if")) {
                 // TODO check children
-                SimpleBoolean condition = (SimpleBoolean)(children.get(1).evaluate(scope));
+                SimpleBoolean condition = SimpleBoolean.valueOf(children.get(1).evaluate(scope));
                 return condition == SimpleBoolean.True ? children.get(2).evaluate(scope) : children.get(3).evaluate(scope);
             } else if (first.value.equals("define")) {
                 return scope.define(children.get(1).value, children.get(2).evaluate(new SimpleScope(scope)));

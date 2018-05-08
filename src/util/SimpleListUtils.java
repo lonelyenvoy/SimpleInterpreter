@@ -11,7 +11,7 @@ public class SimpleListUtils {
         SimpleObject obj = null;
         Assert
                 .True(expressions.length == 1 && ((obj = expressions[0].evaluate(scope)) instanceof SimpleList))
-                .orThrows(TypeError.class, operationName + " function only accepts a list param");
+                .orThrows(TypeError.class, "<" + operationName + "> function only accepts a list param");
         return (SimpleList) obj;
     }
 }

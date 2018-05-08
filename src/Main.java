@@ -1,8 +1,6 @@
 import exception.TypeError;
-import infrastructure.SimpleExpression;
 import infrastructure.SimpleExpressions;
 import infrastructure.SimpleScope;
-import infrastructure.SimpleTokenizer;
 import type.SimpleBoolean;
 import type.SimpleList;
 import type.SimpleNumber;
@@ -13,8 +11,6 @@ import util.SimpleListUtils;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -61,26 +57,26 @@ public class Main {
                     return new SimpleNumber(firstValue / numbers.stream().skip(1).mapToLong(SimpleNumber::getValue).reduce(1, (x, y) -> x * y));
                 })
                 .buildIn("%", (args, scope) -> {
-                    Assert.True(args.length != 2).orThrows(TypeError.class, "Mod function only accepts 2 params");
+                    Assert.True(args.length == 2).orThrows(TypeError.class, "<mod> function only accepts 2 params");
                     List<SimpleNumber> numbers = Arrays.stream(args)
                             .map(expr -> expr.evaluate(scope))
                             .map(SimpleObject::toNumber).collect(Collectors.toList());
                     return new SimpleNumber(numbers.get(0).getValue() % numbers.get(1).getValue());
                 })
                 .buildIn("and", (args, scope) -> {
-                    Assert.True(args.length == 0).orThrows(TypeError.class, "and function does not accept 0 params");
+                    Assert.True(args.length == 0).orThrows(TypeError.class, "<and> function does not accept 0 params");
                     return SimpleBoolean.valueOf(Arrays.stream(args).map(expr -> expr.evaluate(scope))
                             .allMatch(result -> SimpleBoolean.toPrimitive((SimpleBoolean)(result))));
                 })
                 .buildIn("or", (args, scope) -> {
-                    Assert.True(args.length == 0).orThrows(TypeError.class, "or function does not accept 0 params");
+                    Assert.True(args.length == 0).orThrows(TypeError.class, "<or> function does not accept 0 params");
                     return SimpleBoolean.valueOf(Arrays.stream(args).map(expr -> expr.evaluate(scope))
                             .anyMatch(result -> SimpleBoolean.toPrimitive((SimpleBoolean)(result))));
 
                 })
                 .buildIn("not", (args, scope) -> {
-                    Assert.True(args.length != 1).orThrows(TypeError.class, "not function only accepts 1 param");
-                    return SimpleBoolean.valueOf(!(args[0].evaluate(scope) == SimpleBoolean.True));
+                    Assert.True(args.length == 1).orThrows(TypeError.class, "<not> function only accepts 1 param");
+                    return SimpleBoolean.valueOf(SimpleBoolean.valueOf(args[0].evaluate(scope)).negate());
                 })
                 .buildIn("=", (args, scope) -> SimpleBooleanUtils.chainRelations(args, scope, (x, y) -> x.getValue().equals(y.getValue())))
                 .buildIn(">", (args, scope) -> SimpleBooleanUtils.chainRelations(args, scope, (x, y) -> x.getValue().compareTo(y.getValue()) < 0))
@@ -101,7 +97,7 @@ public class Main {
                             .True(args.length == 2
                                     && ((obj0 = args[0].evaluate(scope)) instanceof SimpleList)
                                     && ((obj1 = args[1].evaluate(scope)) instanceof SimpleList))
-                            .orThrows(TypeError.class, "append function only accepts 2 lists");
+                            .orThrows(TypeError.class, "<append> function only accepts 2 lists");
                     SimpleList list0 = (SimpleList) obj0,
                             list1 = (SimpleList) obj1;
                     return new SimpleList(

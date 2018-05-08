@@ -1,7 +1,7 @@
 package exception;
 
-public class TypeError extends Throwable {
+public class TypeError extends RuntimeException {
     public TypeError(String message) {
-        super(message);
+        super("TypeError: " + message);
     }
 }
