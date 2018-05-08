@@ -74,7 +74,10 @@ public class SimpleScope {
                 }
                 String code = scanner.nextLine();
                 if (!code.trim().equals("")) {
-                    System.out.println(evaluate.apply(code, this));
+                    SimpleObject result = evaluate.apply(code, this);
+                    if (result != null) {
+                        System.out.println(result);
+                    }
                 }
             } catch (Throwable e) {
                 System.err.println(e.getMessage());

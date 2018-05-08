@@ -1,4 +1,5 @@
 import exception.TypeError;
+import infrastructure.SimpleExpression;
 import infrastructure.SimpleExpressions;
 import infrastructure.SimpleScope;
 import type.SimpleBoolean;
@@ -102,6 +103,14 @@ public class Main {
                                     StreamSupport.stream(list0.spliterator(), false),
                                     StreamSupport.stream(list1.spliterator(), false))
                                     .collect(Collectors.toList()));
+                })
+                .buildIn("print", (args, scope) -> {
+                    for (SimpleExpression expr : args) {
+                        System.out.print(expr.evaluate(scope));
+                        System.out.print(" ");
+                    }
+                    System.out.println();
+                    return null;
                 })
                 .keepInterpretingInConsole((code, scope) -> SimpleExpressions.parse(code).evaluate(scope));
     }
