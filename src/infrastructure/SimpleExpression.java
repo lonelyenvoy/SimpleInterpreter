@@ -56,7 +56,8 @@ public class SimpleExpression {
             } else if (first.value.equals("function")) {
                 SimpleExpression body = children.get(2);
                 List<String> params = children.get(1).children.stream().map(expr -> expr.value).collect(Collectors.toList());
-                return new SimpleFunction(body, params.toArray(new String[0]), new SimpleScope(scope));
+                SimpleFunction func = new SimpleFunction(body, params.toArray(new String[0]), new SimpleScope(scope));
+                return func;
             } else if (first.value.equals("list")) {
                 return new SimpleList(children.stream().skip(1).map(expr -> expr.evaluate(scope)).collect(Collectors.toList()));
             } else if (SimpleScope.getBuiltinFunctions().containsKey(first.value)) {
@@ -79,7 +80,20 @@ public class SimpleExpression {
     @Override
     public String toString() {
         if (value.equals("(")) {
-            return "(" + String.join(" ", SimpleExpressions.getValues(children)) + ")";
+            StringBuilder builder = new StringBuilder();
+            builder.append("(");
+            boolean first = true;
+            for (SimpleExpression expr : children) {
+                if (first) first = false;
+                else builder.append(" ");
+                if (expr.value.equals("(")) {
+                    builder.append(expr.toString());
+                } else {
+                    builder.append(expr.value);
+                }
+            }
+            builder.append(")");
+            return builder.toString();
         } else {
             return value;
         }

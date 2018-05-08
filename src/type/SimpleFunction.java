@@ -31,7 +31,11 @@ public class SimpleFunction extends SimpleObject {
     }
 
     public SimpleObject evaluate() {
-        return body.evaluate(this.scope);
+        if (computeFilledParameters().size() < parameters.length) {
+            return this;
+        } else {
+            return body.evaluate(this.scope);
+        }
     }
 
     public SimpleFunction update(SimpleObject[] arguments) {
@@ -45,6 +49,15 @@ public class SimpleFunction extends SimpleObject {
         return new SimpleFunction(body, parameters, newScope);
     }
 
+    private List<String> computeFilledParameters() {
+        return Arrays.stream(parameters).filter(param -> scope.findLazily(param) != null).collect(Collectors.toList());
+    }
+
+    public Boolean isPartial() {
+        int filledParameterSize = computeFilledParameters().size();
+        return filledParameterSize >= 1 && filledParameterSize < parameters.length;
+    }
+
     @Override
     public String toString() {
         return String.format(
@@ -54,7 +67,7 @@ public class SimpleFunction extends SimpleObject {
                         Arrays.stream(parameters).map(parameter -> {
                             SimpleObject value = null;
                             if ((value = scope.findLazily(parameter)) != null) {
-                                return parameter + ": " + value;
+                                return parameter + ":" + value;
                             }
                             return parameter;
                         }).collect(Collectors.toList())
