@@ -18,19 +18,16 @@ import java.util.stream.StreamSupport;
 public class Main {
 
     public static void main(String[] sysArgs) {
-//        for (String s : SimpleTokenizer.tokenize("(begin (def a 3) (* a a))")) {
-//            System.out.println(s);
-//        }
 
         System.out.print("Welcome to Simple language v-0.0.1 alpha.\nType in expressions for evaluation.\n\n");
 
         new SimpleScope(null)
                 .buildIn("+", (args, scope) ->
-                    new SimpleNumber(Arrays.stream(args)
-                            .map(expr -> expr.evaluate(scope))
-                            .map(SimpleObject::toNumber)
-                            .mapToLong(SimpleNumber::getValue)
-                            .sum())
+                        new SimpleNumber(Arrays.stream(args)
+                                .map(expr -> expr.evaluate(scope))
+                                .map(SimpleObject::toNumber)
+                                .mapToLong(SimpleNumber::getValue)
+                                .sum())
                 )
                 .buildIn("-", (args, scope) -> {
                     List<SimpleNumber> numbers = Arrays.stream(args)
@@ -43,11 +40,11 @@ public class Main {
                     return new SimpleNumber(firstValue - numbers.stream().skip(1).mapToLong(SimpleNumber::getValue).sum());
                 })
                 .buildIn("*", (args, scope) ->
-                    new SimpleNumber(Arrays.stream(args)
-                            .map(expr -> expr.evaluate(scope))
-                            .map(SimpleObject::toNumber)
-                            .mapToLong(SimpleNumber::getValue)
-                            .reduce(1, (x, y) -> x * y))
+                        new SimpleNumber(Arrays.stream(args)
+                                .map(expr -> expr.evaluate(scope))
+                                .map(SimpleObject::toNumber)
+                                .mapToLong(SimpleNumber::getValue)
+                                .reduce(1, (x, y) -> x * y))
                 )
                 .buildIn("/", (args, scope) -> {
                     List<SimpleNumber> numbers = Arrays.stream(args)
@@ -66,12 +63,12 @@ public class Main {
                 .buildIn("and", (args, scope) -> {
                     Assert.True(args.length == 0).orThrows(TypeError.class, "<and> function does not accept 0 params");
                     return SimpleBoolean.valueOf(Arrays.stream(args).map(expr -> expr.evaluate(scope))
-                            .allMatch(result -> SimpleBoolean.toPrimitive((SimpleBoolean)(result))));
+                            .allMatch(result -> SimpleBoolean.toPrimitive((SimpleBoolean) (result))));
                 })
                 .buildIn("or", (args, scope) -> {
                     Assert.True(args.length == 0).orThrows(TypeError.class, "<or> function does not accept 0 params");
                     return SimpleBoolean.valueOf(Arrays.stream(args).map(expr -> expr.evaluate(scope))
-                            .anyMatch(result -> SimpleBoolean.toPrimitive((SimpleBoolean)(result))));
+                            .anyMatch(result -> SimpleBoolean.toPrimitive((SimpleBoolean) (result))));
 
                 })
                 .buildIn("not", (args, scope) -> {
@@ -79,8 +76,8 @@ public class Main {
                     return SimpleBoolean.valueOf(SimpleBoolean.valueOf(args[0].evaluate(scope)).negate());
                 })
                 .buildIn("=", (args, scope) -> SimpleBooleanUtils.chainRelations(args, scope, (x, y) -> x.getValue().equals(y.getValue())))
-                .buildIn(">", (args, scope) -> SimpleBooleanUtils.chainRelations(args, scope, (x, y) -> x.getValue().compareTo(y.getValue()) < 0))
-                .buildIn("<", (args, scope) -> SimpleBooleanUtils.chainRelations(args, scope, (x, y) -> x.getValue().compareTo(y.getValue()) > 0))
+                .buildIn(">", (args, scope) -> SimpleBooleanUtils.chainRelations(args, scope, (x, y) -> x.getValue().compareTo(y.getValue()) > 0))
+                .buildIn("<", (args, scope) -> SimpleBooleanUtils.chainRelations(args, scope, (x, y) -> x.getValue().compareTo(y.getValue()) < 0))
                 .buildIn("<=", (args, scope) -> SimpleBooleanUtils.chainRelations(args, scope, (x, y) -> x.getValue().compareTo(y.getValue()) <= 0))
                 .buildIn(">=", (args, scope) -> SimpleBooleanUtils.chainRelations(args, scope, (x, y) -> x.getValue().compareTo(y.getValue()) >= 0))
                 .buildIn("first", (args, scope) -> {

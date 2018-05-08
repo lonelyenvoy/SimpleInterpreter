@@ -56,8 +56,7 @@ public class SimpleExpression {
             } else if (first.value.equals("function")) {
                 SimpleExpression body = children.get(2);
                 List<String> params = children.get(1).children.stream().map(expr -> expr.value).collect(Collectors.toList());
-                SimpleFunction func = new SimpleFunction(body, params.toArray(new String[0]), new SimpleScope(scope));
-                return func;
+                return new SimpleFunction(body, params.toArray(new String[0]), new SimpleScope(scope));
             } else if (first.value.equals("list")) {
                 return new SimpleList(children.stream().skip(1).map(expr -> expr.evaluate(scope)).collect(Collectors.toList()));
             } else if (SimpleScope.getBuiltinFunctions().containsKey(first.value)) {
