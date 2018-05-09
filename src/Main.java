@@ -21,7 +21,7 @@ public class Main {
 
     public static void main(String[] sysArgs) {
 
-        System.out.print("Welcome to Simple language v-0.0.4 alpha.\nType in expressions for evaluation.\n\n");
+        System.out.print("Welcome to Simple language v-0.0.5 alpha.\nType in expressions for evaluation.\n\n");
 
         new SimpleScope(null)
                 .buildIn("+", (args, scope) ->
@@ -104,6 +104,12 @@ public class Main {
                                     StreamSupport.stream(list0.spliterator(), false),
                                     StreamSupport.stream(list1.spliterator(), false))
                                     .collect(Collectors.toList()));
+                })
+                .buildIn("empty", (args, scope) -> {
+                    Assert.True(args.length == 1).orThrows(TypeError.class, "<empty> function only accepts 1 param");
+                    SimpleObject list = args[0].evaluate(scope);
+                    Assert.True(list instanceof SimpleList).orThrows(TypeError.class, "<empty> function only accepts list params");
+                    return SimpleBoolean.valueOf(!((SimpleList) list).iterator().hasNext());
                 })
                 .buildIn("print", (args, scope) -> {
                     for (SimpleExpression expr : args) {
