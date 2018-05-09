@@ -1,6 +1,7 @@
 package infrastructure;
 
 import java.util.List;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class SimpleExpressions {
@@ -23,5 +24,17 @@ public class SimpleExpressions {
             }
         }
         return program.getChildren().get(0);
+    }
+
+    public static SimpleExpressionStatus check(String code) {
+        Stack<Character> stack = new Stack<>();
+        for (char c : code.toCharArray()) {
+            if (c == '(') stack.push(c);
+            else if (c == ')') {
+                if (!stack.empty() && stack.peek() == '(') stack.pop();
+                else return SimpleExpressionStatus.INVALID;
+            }
+        }
+        return stack.empty() ? SimpleExpressionStatus.OK : SimpleExpressionStatus.INCOMPLETE;
     }
 }

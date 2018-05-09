@@ -20,7 +20,7 @@ public class Main {
 
     public static void main(String[] sysArgs) {
 
-        System.out.print("Welcome to Simple language v-0.0.2 alpha.\nType in expressions for evaluation.\n\n");
+        System.out.print("Welcome to Simple language v-0.0.3 alpha.\nType in expressions for evaluation.\n\n");
 
         new SimpleScope(null)
                 .buildIn("+", (args, scope) ->
@@ -112,6 +112,8 @@ public class Main {
                     System.out.println();
                     return null;
                 })
-                .keepInterpretingInConsole((code, scope) -> SimpleExpressions.parse(code).evaluate(scope));
+                .keepInterpretingInConsole(
+                        SimpleExpressions::check,
+                        (code, scope) -> SimpleExpressions.parse(code).evaluate(scope));
     }
 }

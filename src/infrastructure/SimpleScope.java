@@ -2,6 +2,7 @@ package infrastructure;
 
 import exception.ReferenceError;
 import exception.RuntimeInternalError;
+import exception.SyntaxError;
 import type.SimpleObject;
 import util.Assert;
 
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class SimpleScope {
     private SimpleScope parent;
@@ -64,23 +66,33 @@ public class SimpleScope {
         return null;
     }
 
-    public void keepInterpretingInConsole(BiFunction<String, SimpleScope, SimpleObject> evaluate) {
+    public void keepInterpretingInConsole(Function<String, SimpleExpressionStatus> check, BiFunction<String, SimpleScope, SimpleObject> evaluate) {
         Scanner scanner = new Scanner(System.in);
+        String code = "";
         while (true) {
             try {
-                System.out.print("> ");
+                System.out.print(code.equals("") ? "> " : "... ");
                 if (!scanner.hasNext()) {
                     break;
                 }
-                String code = scanner.nextLine();
+                code += scanner.nextLine() + "\n";
                 if (!code.trim().equals("")) {
-                    SimpleObject result = evaluate.apply(code, this);
-                    if (result != null) {
-                        System.out.println(result);
+                    SimpleExpressionStatus status = check.apply(code);
+                    if (status == SimpleExpressionStatus.OK) {
+                        SimpleObject result = evaluate.apply(code, this);
+                        if (result != null) {
+                            System.out.println(result);
+                        }
+                        code = "";
+                    } else if (status == SimpleExpressionStatus.INVALID) {
+                        throw new SyntaxError("Invalid expression");
                     }
+                    // status == SimpleExpressionStatus.INCOMPLETE
+                    // continue
                 }
             } catch (Throwable e) {
                 System.err.println(e.getMessage());
+                code = "";
             }
         }
     }
