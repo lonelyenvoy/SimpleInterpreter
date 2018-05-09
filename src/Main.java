@@ -63,12 +63,12 @@ public class Main {
                     return new SimpleNumber(numbers.get(0).getValue() % numbers.get(1).getValue());
                 })
                 .buildIn("and", (args, scope) -> {
-                    Assert.True(args.length == 0).orThrows(TypeError.class, "<and> function does not accept 0 params");
+                    Assert.True(args.length != 0).orThrows(TypeError.class, "<and> function does not accept 0 params");
                     return SimpleBoolean.valueOf(Arrays.stream(args).map(expr -> expr.evaluate(scope))
                             .allMatch(result -> SimpleBoolean.toPrimitive((SimpleBoolean) (result))));
                 })
                 .buildIn("or", (args, scope) -> {
-                    Assert.True(args.length == 0).orThrows(TypeError.class, "<or> function does not accept 0 params");
+                    Assert.True(args.length != 0).orThrows(TypeError.class, "<or> function does not accept 0 params");
                     return SimpleBoolean.valueOf(Arrays.stream(args).map(expr -> expr.evaluate(scope))
                             .anyMatch(result -> SimpleBoolean.toPrimitive((SimpleBoolean) (result))));
 
