@@ -12,6 +12,7 @@ import util.SimpleListUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -20,7 +21,7 @@ public class Main {
 
     public static void main(String[] sysArgs) {
 
-        System.out.print("Welcome to Simple language v-0.0.3 alpha.\nType in expressions for evaluation.\n\n");
+        System.out.print("Welcome to Simple language v-0.0.4 alpha.\nType in expressions for evaluation.\n\n");
 
         new SimpleScope(null)
                 .buildIn("+", (args, scope) ->
@@ -111,6 +112,16 @@ public class Main {
                     }
                     System.out.println();
                     return null;
+                })
+                .buildIn("random", (args, scope) -> {
+                    Assert.True(args.length == 2).orThrows(TypeError.class, "<random> function only accepts 2 params");
+                    SimpleObject low = args[0].evaluate(scope);
+                    SimpleObject high = args[1].evaluate(scope);
+                    Assert
+                            .True(low instanceof SimpleNumber && high instanceof SimpleNumber)
+                            .orThrows(TypeError.class, "<random> function only accepts number params");
+                    return new SimpleNumber(ThreadLocalRandom.current().nextLong(
+                            ((SimpleNumber) low).getValue(), ((SimpleNumber) high).getValue() + 1));
                 })
                 .keepInterpretingInConsole(
                         SimpleExpressions::check,

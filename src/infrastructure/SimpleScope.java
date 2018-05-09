@@ -72,11 +72,12 @@ public class SimpleScope {
         while (true) {
             try {
                 System.out.print(code.equals("") ? "> " : "... ");
-                if (!scanner.hasNext()) {
+                if (!scanner.hasNextLine()) {
                     break;
                 }
-                code += scanner.nextLine() + "\n";
+                code += scanner.nextLine();
                 if (!code.trim().equals("")) {
+                    code += "\n";
                     SimpleExpressionStatus status = check.apply(code);
                     if (status == SimpleExpressionStatus.OK) {
                         SimpleObject result = evaluate.apply(code, this);
