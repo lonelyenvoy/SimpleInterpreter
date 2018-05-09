@@ -6,6 +6,7 @@ import exception.SyntaxError;
 import type.SimpleObject;
 import util.Assert;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -66,12 +67,16 @@ public class SimpleScope {
         return null;
     }
 
-    public void keepInterpretingInConsole(Function<String, SimpleExpressionStatus> check, BiFunction<String, SimpleScope, SimpleObject> evaluate) {
-        Scanner scanner = new Scanner(System.in);
+    public void interpret(InputStream inputStream,
+                          Function<String, SimpleExpressionStatus> check,
+                          BiFunction<String, SimpleScope, SimpleObject> evaluate,
+                          boolean showPrompts,
+                          boolean showResults) {
+        Scanner scanner = new Scanner(inputStream);
         String code = "";
         while (true) {
             try {
-                System.out.print(code.equals("") ? ">>> " : "... ");
+                if (showPrompts) System.out.print(code.equals("") ? ">>> " : "... ");
                 if (!scanner.hasNextLine()) {
                     break;
                 }
@@ -81,7 +86,7 @@ public class SimpleScope {
                     SimpleExpressionStatus status = check.apply(code);
                     if (status == SimpleExpressionStatus.OK) {
                         SimpleObject result = evaluate.apply(code, this);
-                        if (result != null) {
+                        if (showResults && result != null) {
                             System.out.println(result);
                         }
                         code = "";

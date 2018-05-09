@@ -1,3 +1,4 @@
+import constant.EnvironmentConstants;
 import exception.TypeError;
 import infrastructure.SimpleExpression;
 import infrastructure.SimpleExpressions;
@@ -10,20 +11,40 @@ import util.Assert;
 import util.SimpleBooleanUtils;
 import util.SimpleListUtils;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class Main {
+public class Simple {
 
-    public static void main(String[] sysArgs) {
+    private SimpleScope environment;
 
-        System.out.print("Welcome to Simple language v-0.0.8 alpha.\nType in expressions for evaluation.\n\n");
+    private Simple(SimpleScope environment) {
+        this.environment = environment;
+    }
 
-        new SimpleScope(null)
+    public static void main(String[] args) throws FileNotFoundException {
+        if (args.length == 0) {
+            System.out.print("Welcome to Simple language " + EnvironmentConstants.VERSION + ".\nType in expressions for evaluation.\n\n");
+            createEnvironment().runREPL();
+        } else if (args[0].equals("-v")) {
+            System.out.println(EnvironmentConstants.VERSION);
+        } else if (args[0].equals("-i")) {
+            List<File> files = new ArrayList<>();
+            for (int i = 1; i < args.length; i++) {
+                files.add(new File(args[i]));
+            }
+            createEnvironment().parseFiles(files.toArray(new File[0]));
+        } else {
+            showHelp();
+        }
+    }
+
+    private static Simple createEnvironment() {
+        return new Simple(new SimpleScope(null)
                 .buildIn("+", (args, scope) ->
                         new SimpleNumber(Arrays.stream(args)
                                 .map(expr -> expr.evaluate(scope))
@@ -128,9 +149,38 @@ public class Main {
                             .orThrows(TypeError.class, "<random> function only accepts number params");
                     return new SimpleNumber(ThreadLocalRandom.current().nextLong(
                             ((SimpleNumber) low).getValue(), ((SimpleNumber) high).getValue() + 1));
-                })
-                .keepInterpretingInConsole(
-                        SimpleExpressions::check,
-                        (code, scope) -> SimpleExpressions.parse(code).evaluate(scope));
+                }));
+    }
+
+    private void runREPL() {
+        environment.interpret(
+                System.in,
+                SimpleExpressions::check,
+                (code, scope) -> SimpleExpressions.parse(code).evaluate(scope),
+                true,
+                true);
+    }
+
+    private void parseFiles(File... files) throws FileNotFoundException {
+        List<FileInputStream> fileInputStreams = new ArrayList<>();
+        for (File file : files) {
+            fileInputStreams.add(new FileInputStream(file));
+        }
+        SequenceInputStream stream = new SequenceInputStream(Collections.enumeration(new ArrayList<InputStream>() {{
+            addAll(fileInputStreams);
+        }}));
+        environment.interpret(
+                stream,
+                SimpleExpressions::check,
+                (code, scope) -> SimpleExpressions.parse(code).evaluate(scope),
+                false,
+                false);
+    }
+
+    private static void showHelp() {
+        System.out.println("Usage: ");
+        System.out.println("  (no argument)                 Enter REPL");
+        System.out.println("  -v                            Show version");
+        System.out.println("  -i filename1 [filename2 ...]  Read and evaluate code from input files");
     }
 }
