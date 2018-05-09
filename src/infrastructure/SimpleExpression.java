@@ -47,7 +47,7 @@ public class SimpleExpression {
                 return condition == SimpleBoolean.True ? children.get(2).evaluate(scope) : children.get(3).evaluate(scope);
             } else if (first.value.equals("define")) {
                 return scope.define(children.get(1).value, children.get(2).evaluate(new SimpleScope(scope)));
-            } else if (first.value.equals("begin")) {
+            } else if (first.value.equals("do")) {
                 SimpleObject result = null;
                 for (SimpleExpression expr : children.stream().skip(1).collect(Collectors.toList())) {
                     result = expr.evaluate(scope);
