@@ -71,7 +71,7 @@ public class SimpleScope {
         String code = "";
         while (true) {
             try {
-                System.out.print(code.equals("") ? "> " : "... ");
+                System.out.print(code.equals("") ? ">>> " : "... ");
                 if (!scanner.hasNextLine()) {
                     break;
                 }

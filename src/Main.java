@@ -21,7 +21,7 @@ public class Main {
 
     public static void main(String[] sysArgs) {
 
-        System.out.print("Welcome to Simple language v-0.0.6 alpha.\nType in expressions for evaluation.\n\n");
+        System.out.print("Welcome to Simple language v-0.0.7 alpha.\nType in expressions for evaluation.\n\n");
 
         new SimpleScope(null)
                 .buildIn("+", (args, scope) ->
