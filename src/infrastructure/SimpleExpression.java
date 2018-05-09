@@ -33,10 +33,16 @@ public class SimpleExpression {
             try {
                 return new SimpleNumber(Long.parseLong(value));
             } catch (NumberFormatException ex) {
-                try {
-                    return scope.find(value);
-                } catch (ReferenceError referenceError) {
-                    referenceError.printStackTrace();
+                if (value.equals("false")) {
+                    return SimpleBoolean.False;
+                } else if (value.equals("true")) {
+                    return SimpleBoolean.True;
+                } else {
+                    try {
+                        return scope.find(value);
+                    } catch (ReferenceError referenceError) {
+                        referenceError.printStackTrace();
+                    }
                 }
             }
         } else {
