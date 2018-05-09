@@ -91,8 +91,8 @@ public class SimpleScope {
                     // status == SimpleExpressionStatus.INCOMPLETE
                     // continue
                 }
-            } catch (Throwable e) {
-                System.err.println(e.getMessage());
+            } catch (Throwable ex) {
+                ex.printStackTrace();
                 code = "";
             }
         }

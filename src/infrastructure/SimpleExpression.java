@@ -1,6 +1,7 @@
 package infrastructure;
 
 import exception.ReferenceError;
+import exception.RuntimeInternalError;
 import type.*;
 
 import java.util.ArrayList;
@@ -29,57 +30,58 @@ public class SimpleExpression {
     }
 
     public SimpleObject evaluate(SimpleScope scope) {
-        if (this.children.size() == 0) {
-            try {
-                return new SimpleNumber(Long.parseLong(value));
-            } catch (NumberFormatException ex) {
-                if (value.equals("false")) {
-                    return SimpleBoolean.False;
-                } else if (value.equals("true")) {
-                    return SimpleBoolean.True;
+        SimpleExpression current = this;
+        while (true) {
+            if (current.children.size() == 0) {
+                try {
+                    return new SimpleNumber(Long.parseLong(current.value));
+                } catch (NumberFormatException ex) {
+                    if (current.value.equals("false")) {
+                        return SimpleBoolean.False;
+                    } else if (current.value.equals("true")) {
+                        return SimpleBoolean.True;
+                    } else {
+                        return scope.find(current.value);
+                    }
+                }
+            } else {
+                SimpleExpression first = current.children.get(0);
+                if (first.value.equals("if")) {
+                    // TODO check children
+                    SimpleBoolean condition = SimpleBoolean.valueOf(current.children.get(1).evaluate(scope));
+                    return condition == SimpleBoolean.True ? current.children.get(2).evaluate(scope) : current.children.get(3).evaluate(scope);
+                } else if (first.value.equals("define")) {
+                    return scope.define(current.children.get(1).value, current.children.get(2).evaluate(new SimpleScope(scope)));
+                } else if (first.value.equals("do")) {
+                    SimpleObject result = null;
+                    for (SimpleExpression expr : current.children.stream().skip(1).collect(Collectors.toList())) {
+                        result = expr.evaluate(scope);
+                    }
+                    return result;
+                } else if (first.value.equals("function")) {
+                    SimpleExpression body = current.children.get(2);
+                    List<String> params = current.children.get(1).children.stream().map(expr -> expr.value).collect(Collectors.toList());
+                    return new SimpleFunction(body, params.toArray(new String[0]), new SimpleScope(scope));
+                } else if (first.value.equals("list")) {
+                    SimpleScope finalScope = scope;
+                    return new SimpleList(current.children.stream().skip(1).map(expr -> expr.evaluate(finalScope)).collect(Collectors.toList()));
+                } else if (SimpleScope.getBuiltinFunctions().containsKey(first.value)) {
+                    List<SimpleExpression> args = current.children.stream().skip(1).collect(Collectors.toList());
+                    return SimpleScope.getBuiltinFunctions().get(first.value).apply(args.toArray(new SimpleExpression[0]), scope);
                 } else {
-                    try {
-                        return scope.find(value);
-                    } catch (ReferenceError referenceError) {
-                        referenceError.printStackTrace();
+                    SimpleFunction function = first.value.equals("(") ? (SimpleFunction) first.evaluate(scope) : (SimpleFunction) scope.find(first.value);
+                    SimpleScope finalScope = scope;
+                    List<SimpleObject> arguments = current.children.stream().skip(1).map(expr -> expr.evaluate(finalScope)).collect(Collectors.toList());
+                    SimpleFunction newFunction = function.update(arguments.toArray(new SimpleObject[0]));
+                    if (newFunction.isPartial()) {
+                        return newFunction.evaluate();
+                    } else {
+                        current = newFunction.getBody();
+                        scope = newFunction.getScope();
                     }
                 }
             }
-        } else {
-            SimpleExpression first = children.get(0);
-            if (first.value.equals("if")) {
-                // TODO check children
-                SimpleBoolean condition = SimpleBoolean.valueOf(children.get(1).evaluate(scope));
-                return condition == SimpleBoolean.True ? children.get(2).evaluate(scope) : children.get(3).evaluate(scope);
-            } else if (first.value.equals("define")) {
-                return scope.define(children.get(1).value, children.get(2).evaluate(new SimpleScope(scope)));
-            } else if (first.value.equals("do")) {
-                SimpleObject result = null;
-                for (SimpleExpression expr : children.stream().skip(1).collect(Collectors.toList())) {
-                    result = expr.evaluate(scope);
-                }
-                return result;
-            } else if (first.value.equals("function")) {
-                SimpleExpression body = children.get(2);
-                List<String> params = children.get(1).children.stream().map(expr -> expr.value).collect(Collectors.toList());
-                return new SimpleFunction(body, params.toArray(new String[0]), new SimpleScope(scope));
-            } else if (first.value.equals("list")) {
-                return new SimpleList(children.stream().skip(1).map(expr -> expr.evaluate(scope)).collect(Collectors.toList()));
-            } else if (SimpleScope.getBuiltinFunctions().containsKey(first.value)) {
-                List<SimpleExpression> args = children.stream().skip(1).collect(Collectors.toList());
-                return SimpleScope.getBuiltinFunctions().get(first.value).apply(args.toArray(new SimpleExpression[0]), scope);
-            } else {
-                SimpleFunction function = null;
-                try {
-                    function = first.value.equals("(") ? (SimpleFunction) first.evaluate(scope) : (SimpleFunction) scope.find(first.value);
-                } catch (ReferenceError referenceError) {
-                    referenceError.printStackTrace();
-                }
-                List<SimpleObject> arguments = children.stream().skip(1).map(expr -> expr.evaluate(scope)).collect(Collectors.toList());
-                return function.update(arguments.toArray(new SimpleObject[0])).evaluate();
-            }
         }
-        throw new Error("INVALID EVALUATION");
     }
 
     @Override
