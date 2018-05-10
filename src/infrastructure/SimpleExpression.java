@@ -3,6 +3,7 @@ package infrastructure;
 import exception.ReferenceError;
 import exception.RuntimeInternalError;
 import type.*;
+import util.PrettyPrintUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,9 @@ public class SimpleExpression {
         this.parent = parent;
     }
 
+    /**
+     * Last updated in version: v-0.0.10 alpha
+     */
     public SimpleObject evaluate(SimpleScope scope) {
         SimpleExpression current = this;
         while (true) {
@@ -80,6 +84,65 @@ public class SimpleExpression {
                         scope = newFunction.getScope();
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Last updated in version: v-0.0.10 alpha
+     */
+    public void doSyntaxAnalysis(int depth) {
+        if (children.size() == 0) {
+            try {
+                Long.parseLong(value);
+                PrettyPrintUtils.println("Number: " + value, depth);
+            } catch (NumberFormatException ex) {
+                if (value.equals("false") || value.equals("true")) {
+                    PrettyPrintUtils.println("Boolean: " + value, depth);
+                } else {
+                    PrettyPrintUtils.println("Id: " + value, depth);
+                }
+            }
+        } else {
+            SimpleExpression first = children.get(0);
+            if (first.value.equals("if")) {
+                PrettyPrintUtils.println("Keyword: " + first, depth);
+                PrettyPrintUtils.println("Condition: ", depth);
+                children.get(1).doSyntaxAnalysis(depth + 1);
+                PrettyPrintUtils.println("If-True: ", depth);
+                children.get(2).doSyntaxAnalysis(depth + 1);
+                PrettyPrintUtils.println("If-False: ", depth);
+                children.get(3).doSyntaxAnalysis(depth + 1);
+            } else if (first.value.equals("define")) {
+                PrettyPrintUtils.println("Keyword: " + first, depth);
+                PrettyPrintUtils.println("Id: " + children.get(1), depth);
+                PrettyPrintUtils.println("Value: ", depth);
+                children.get(2).doSyntaxAnalysis(depth + 1);
+            } else if (first.value.equals("do")) {
+                PrettyPrintUtils.println("Keyword: " + first, depth);
+                for (SimpleExpression expr : children.stream().skip(1).collect(Collectors.toList())) {
+                    expr.doSyntaxAnalysis(depth + 1);
+                }
+            } else if (first.value.equals("function")) {
+                PrettyPrintUtils.println("Keyword: " + first, depth);
+                PrettyPrintUtils.print("Arguments: ", depth);
+                for (String arg : children.get(1).children.stream().map(expr -> expr.value).collect(Collectors.toList())) {
+                    PrettyPrintUtils.print(arg + " ", 0);
+                }
+                PrettyPrintUtils.println("", depth);
+                PrettyPrintUtils.println("Body: ", depth);
+                children.get(2).doSyntaxAnalysis(depth + 1);
+            } else if (first.value.equals("list")) {
+                PrettyPrintUtils.println("Keyword: " + first, depth);
+                children.stream().skip(1).forEach(expr -> expr.doSyntaxAnalysis(depth + 1));
+            } else if (SimpleScope.getBuiltinFunctions().containsKey(first.value)) {
+                PrettyPrintUtils.println("Function: " + first, depth);
+                PrettyPrintUtils.println("Arguments: ", depth);
+                children.stream().skip(1).forEach(expr -> expr.doSyntaxAnalysis(depth + 1));
+            } else {
+                PrettyPrintUtils.println("Function: " + first, depth);
+                PrettyPrintUtils.println("Arguments: ", depth);
+                children.stream().skip(1).forEach(expr -> expr.doSyntaxAnalysis(depth + 1));
             }
         }
     }

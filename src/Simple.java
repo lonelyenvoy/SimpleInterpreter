@@ -7,11 +7,11 @@ import type.SimpleBoolean;
 import type.SimpleList;
 import type.SimpleNumber;
 import type.SimpleObject;
-import util.Assert;
-import util.SimpleBooleanUtils;
-import util.SimpleListUtils;
+import util.*;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -26,7 +26,7 @@ public class Simple {
         this.environment = environment;
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws IOException {
         if (args.length == 0) {
             System.out.print("Welcome to Simple language " + EnvironmentConstants.VERSION + ".\nType in expressions for evaluation.\n\n");
             createEnvironment().runREPL();
@@ -38,6 +38,24 @@ public class Simple {
                 files.add(new File(args[i]));
             }
             createEnvironment().parseFiles(files.toArray(new File[0]));
+        } else if (args[0].equals("-l")) {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 1; i < args.length; i++) {
+                for (String line : Files.readAllLines(Paths.get(args[i]))) {
+                    builder.append(line);
+                }
+            }
+            LexicalAnalysisUtils.analysis(builder.toString());
+        } else if (args[0].equals("-s")) {
+            List<String> lines = new ArrayList<>();
+            for (int i = 1; i < args.length; i++) {
+                lines.addAll(Files.readAllLines(Paths.get(args[i])));
+            }
+            SyntaxAnalysisUtils.analyse(
+                    lines,
+                    createEnvironment().environment,
+                    SimpleExpressions::check,
+                    (code, scope) -> SimpleExpressions.parse(code).doSyntaxAnalysis(0));
         } else {
             showHelp();
         }
@@ -182,5 +200,7 @@ public class Simple {
         System.out.println("  (no argument)                 Enter REPL");
         System.out.println("  -v                            Show version");
         System.out.println("  -i filename1 [filename2 ...]  Read and evaluate code from input files");
+        System.out.println("  -l filename1 [filename2 ...]  Do lexical analysis on code from input files");
+        System.out.println("  -s filename1 [filename2 ...]  Do syntax analysis on code from input files");
     }
 }
