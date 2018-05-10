@@ -132,7 +132,7 @@ E -> (KEYWORD E*) | (FUNCTION E*)
 BOOLEAN -> true | false
 KEYWORD -> if | define | do | function | list
 FUNCTION -> BUILTINFUNC | customfunc
-BUILTINFUNC -> +|-|*|/|%|and|or|not|=|<|>|<=|>=|first|rest|append|empty|random|print
+BUILTINFUNC -> + | - | * | / | % | and | or | not | = | < | > | <= | >= | first | rest | append | empty | random | print
 ```
 
 ## Contributing
