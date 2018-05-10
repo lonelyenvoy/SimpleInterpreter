@@ -1,0 +1,47 @@
+(define T1 (function (opponentChoices round) 1))
+
+(define T2 (function (opponentChoices round) 
+  (do
+    (define i (random 0 3))
+    (if (= i 3) 0 1)
+  )
+))
+
+(define T3 (function (opponentChoices round) 
+  (if 
+    (= round 0)
+    1
+    (get opponentChoices (- round 1))
+  )
+))
+
+(define T4 (function (opponentChoices round)
+  (if
+    (= round 0)
+    1
+    (do
+      (define i (random 0 9))
+      (if
+        (= i 9)
+        0
+        (get opponentChoices (- round 1))
+      )
+    )
+  )
+))
+
+(define T5 (function (opponentChoices round)
+  (_T5 opponentChoices round 0)
+))
+
+(define _T5 (function (opponentChoices round k)
+  (if
+    (< k round)
+    (if
+      (= (get opponentChoices k) 0)
+      0
+      (_T5 opponentChoices round (+ k 1))
+    )
+    1
+  )
+))

@@ -1,0 +1,95 @@
+(define runCompetition (function (strategyA strategyB round)
+  (_runCompetition strategyA strategyB (list) (list) (list) (list) round 0)
+))
+
+(define _runCompetition (function (strategyA strategyB choicesA choicesB scoresA scoresB round k)
+  (if
+    (= round k)
+    (list scoresA scoresB choicesA choicesB)
+    (do
+      (define choiceA (strategyA choicesB k))
+      (define choiceB (strategyB choicesA k))
+      (if
+        (and (= choiceA 0) (= choiceB 0))
+        (do 
+          (define scoreA 1)
+          (define scoreB 1)
+        )
+        (if
+          (and (= choiceA 1) (= choiceB 0))
+          (do 
+            (define scoreA 0)
+            (define scoreB 5)
+          )
+          (if
+            (and (= choiceA 0) (= choiceB 1))
+            (do 
+              (define scoreA 5)
+              (define scoreB 0)
+            )
+            (do 
+              (define scoreA 3)
+              (define scoreB 3)
+            )
+          )
+        )
+      )
+      (define choicesA (append choicesA (list choiceA)))
+      (define choicesB (append choicesB (list choiceB)))
+      (define scoresA (append scoresA (list scoreA)))
+      (define scoresB (append scoresB (list scoreB)))
+      (_runCompetition strategyA strategyB choicesA choicesB scoresA scoresB round (+ k 1))
+    )
+  )
+))
+
+
+(define n 50)
+
+(define result12 (runCompetition T1 T2 n))
+(define result13 (runCompetition T1 T3 n))
+(define result14 (runCompetition T1 T4 n))
+(define result15 (runCompetition T1 T5 n))
+(define result23 (runCompetition T2 T3 n))
+(define result24 (runCompetition T2 T4 n))
+(define result25 (runCompetition T2 T5 n))
+(define result34 (runCompetition T3 T4 n))
+(define result35 (runCompetition T3 T5 n))
+(define result45 (runCompetition T4 T5 n))
+
+(define scores 
+  (list 
+    (+
+      (sum (get result12 0))
+      (sum (get result13 0))
+      (sum (get result14 0))
+      (sum (get result15 0))
+    )
+    (+
+      (sum (get result12 1))
+      (sum (get result23 0))
+      (sum (get result24 0))
+      (sum (get result25 0))
+    )
+    (+
+      (sum (get result13 1))
+      (sum (get result23 1))
+      (sum (get result34 0))
+      (sum (get result35 0))
+    )
+    (+
+      (sum (get result14 1))
+      (sum (get result24 1))
+      (sum (get result34 1))
+      (sum (get result45 0))
+    )
+    (+
+      (sum (get result15 1))
+      (sum (get result25 1))
+      (sum (get result35 1))
+      (sum (get result45 1))
+    )
+  )
+)
+
+(print scores)

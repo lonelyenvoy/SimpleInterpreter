@@ -1,0 +1,9 @@
+(define calculate (function (target current)
+  (if
+    (> current target)
+    0
+    (+ current (calculate target (+ current 1)))
+  )
+))
+
+(print (calculate 100 0))

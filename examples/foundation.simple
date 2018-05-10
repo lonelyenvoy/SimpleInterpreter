@@ -1,0 +1,46 @@
+(define length (function (target) 
+  (__length target 0)
+))
+
+(define __length (function (target k)
+  (do
+    (if (empty target) 
+      k
+      (__length (rest target) (+ k 1))
+    )
+  )
+))
+
+(define get (function (target k)
+  (if 
+    (or (< k 0) (>= k (length target)))
+    false
+    (__get target k 0)
+  )
+))
+
+(define __get (function (target k now)
+  (do
+    (if 
+      (= now k)
+      (first target)
+      (__get (rest target) k (+ now 1))
+    )
+  )
+))
+
+(define sum (function (target)
+  (if
+    (empty target)
+    0
+    (+ (first target) (sum (rest target)))
+  )
+))
+
+(define map (function (target fun)
+  (if
+    (empty target)
+    (list)
+    (append (list (fun (first target))) (map (rest target) fun))
+  )
+))
