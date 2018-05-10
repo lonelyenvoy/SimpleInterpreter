@@ -1,13 +1,21 @@
-## SimpleInterpreter
+# SimpleInterpreter
+
+[![auc][aucsvg]][auc] [![License][licensesvg]][license]
+
+[aucsvg]: https://img.shields.io/badge/SimpleInterpreter-v0.0.10_alpha-brightgreen.svg
+[auc]: https://github.com/lonelyenvoy/SimpleInterpreter
+
+[licensesvg]: https://img.shields.io/badge/License-MIT-blue.svg
+[license]: https://github.com/lonelyenvoy/SimpleInterpreter/blob/master/LICENSE
 
 An interpreter for Simple language.
 
-### Introduction
+## Introduction
 
 Simple © is a user-friendly high-level functional programing language running on JVM,
 letting you build greater system with less code.
 
-### Usage
+## Usage
 
 ```
 java Simple
@@ -18,16 +26,16 @@ java Simple
   -s filename1 [filename2 ...]  Do syntax analysis on code from input files
 ```
 
-### Syntax
+## Syntax
 
 Simple has a syntax very similar to Common Lisp.
 
-1. Assigning value to variables:
+**1. Assigning value to variables:**
 ```lisp
 (define numberOfCars 20)
 ```
 
-2. Arithmetic operation:
+**2. Arithmetic operation:**
 ```lisp
 (+ 20 30)    ; 50
 (- 40 50)    ; -10
@@ -36,7 +44,7 @@ Simple has a syntax very similar to Common Lisp.
 (% 15 4)     ; 3
 ```
 
-3. Relations and logical operations:
+**3. Relations and logical operations:**
 ```lisp
 (= 10 20)                    ; false
 (< 10 20)                    ; true
@@ -46,7 +54,7 @@ Simple has a syntax very similar to Common Lisp.
 ```
 
 
-4. Manipulating Control flows:
+**4. Manipulating Control flows:**
 ```lisp
 (define price 20)
 (define discount true)
@@ -59,7 +67,7 @@ Simple has a syntax very similar to Common Lisp.
 ```
 The false clause of ```if``` statement can be omitted.
 
-5. Defining functions:
+**5. Defining functions:**
 ```lisp
 (define add (function (a b)
   (+ a b)
@@ -68,12 +76,12 @@ The false clause of ```if``` statement can be omitted.
 where ```add``` is the function name, ```a``` and ```b``` are function arguments,
 ```(+ a b)``` is the body (and the return value) of the function.
 
-6. Function calls:
+**6. Function calls:**
 ```lisp
 (add 20 30)    ; 50
 ```
 
-7. Multiple expression in functions:
+**7. Multiple expression in functions:**
 
 ```lisp
 (define addOneAndTwo (function ()
@@ -86,7 +94,7 @@ where ```add``` is the function name, ```a``` and ```b``` are function arguments
 ```
 The last statement in ```do``` will be the return value.
 
-8. Manipulating lists:
+**8. Manipulating lists:**
 
 ```lisp
 (define alist (list 10 20 30))
@@ -96,13 +104,13 @@ The last statement in ```do``` will be the return value.
 (empty alist)                     ; false
 ```
 
-9. Other built-in functions:
+**9. Other built-in functions:**
 
 ```lisp
 (random 0 10)    ; generate a random integer between [0, 10]
 ```
 
-10. Printing values:
+**10. Printing values:**
 ```lisp
 (print 10)    ; 10
 ```
@@ -110,7 +118,11 @@ All the evaluation results of expressions will be automatically printed in REPL.
 ```print``` statement is only useful in code files.
 
 
-### Grammar
+## Types
+
+```Number```, ```Boolean```, ```List```, ```Function``` are supported. All types are the subclass of ```Object```.
+
+## Grammar
 
 ```
 E -> id | number | BOOLEAN
@@ -123,10 +135,10 @@ FUNCTION -> BUILTINFUNC | customfunc
 BUILTINFUNC -> +|-|*|/|%|and|or|not|=|<|>|<=|>=|first|rest|append|empty|random|print
 ```
 
-### Contributing
+## Contributing
 
-Any improvement or bug-fixing is welcome. Create a pull request when you are done.
+Any improvement or bug-fixing is welcome. Create a [pull request](https://github.com/lonelyenvoy/SimpleInterpreter/pulls) when you are done.
 
-### License
+## License
 
-The MIT License
+[The MIT License](https://github.com/lonelyenvoy/SimpleInterpreter/blob/master/LICENSE)
