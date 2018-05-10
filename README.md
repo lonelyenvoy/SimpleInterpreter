@@ -59,10 +59,11 @@ Simple has a syntax very similar to Common Lisp.
 (define price 20)
 (define discount true)
 (define price
-(if
-  (= discount true)
-  (/ price 2)            ; if discount is true
-  price                  ; if discount is false
+  (if
+    (= discount true)
+    (/ price 2)            ; if discount is true
+    price                  ; if discount is false
+  )
 )
 ```
 The false clause of ```if``` statement can be omitted.
