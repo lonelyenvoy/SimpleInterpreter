@@ -44,7 +44,7 @@
 ))
 
 
-(define n 50)
+(define n 30)
 
 (define result12 (runCompetition T1 T2 n))
 (define result13 (runCompetition T1 T3 n))
@@ -107,5 +107,5 @@
   )
 )
 
-(print (map scores (function (x) (get x 1) )))
-(print (sort scores false 1))
+(print (pull scores 1))
+(print (pull (sort scores false 1) 0))

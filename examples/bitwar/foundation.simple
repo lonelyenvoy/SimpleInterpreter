@@ -44,3 +44,7 @@
     (append (list (fun (first target))) (map (rest target) fun))
   )
 ))
+
+(define pull (function (target index)
+  (map target (function (inner) (get inner index)))
+))
