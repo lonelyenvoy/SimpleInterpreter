@@ -3,10 +3,7 @@ import exception.TypeError;
 import infrastructure.SimpleExpression;
 import infrastructure.SimpleExpressions;
 import infrastructure.SimpleScope;
-import type.SimpleBoolean;
-import type.SimpleList;
-import type.SimpleNumber;
-import type.SimpleObject;
+import type.*;
 import util.*;
 
 import java.io.*;
@@ -167,7 +164,80 @@ public class Simple {
                             .orThrows(TypeError.class, "<random> function only accepts number params");
                     return new SimpleNumber(ThreadLocalRandom.current().nextLong(
                             ((SimpleNumber) low).getValue(), ((SimpleNumber) high).getValue() + 1));
-                }));
+                })
+                .buildIn("sort", (args, scope) -> {
+                    Assert.True(args.length >= 1 && args.length <= 3).orThrows(TypeError.class, "<sort> function only accepts 1-3 params");
+                    SimpleObject list = args[0].evaluate(scope);
+                    SimpleObject ascending = SimpleBoolean.valueOf(true);
+                    SimpleObject criterionIndex = null;
+                    if (args.length >= 2) {
+                        ascending = args[1].evaluate(scope);
+                        if (args.length == 3) {
+                            criterionIndex = args[2].evaluate(scope);
+                        }
+                    }
+                    Assert.True(list instanceof SimpleList).orThrows(TypeError.class, "<sort> function only accepts a list as param 1");
+                    Assert.True(ascending instanceof SimpleBoolean).orThrows(TypeError.class, "<sort> function only accepts a boolean as param 2");
+                    Assert.True(criterionIndex == null || criterionIndex instanceof SimpleNumber).orThrows(TypeError.class, "<sort> function only accepts a number as param 3");
+
+                    if (criterionIndex == null) { // simple sort
+                        List<SimpleObject> numberList = new ArrayList<>();
+                        for (SimpleObject element : ((SimpleList) list)) {
+                            Assert.True(element instanceof SimpleNumber).orThrows(TypeError.class, "Unable to sort non-number values");
+                            SimpleNumber numberElement = element.toNumber();
+                            numberList.add(numberElement);
+                        }
+                        SimpleObject finalAscending = ascending;
+                        numberList.sort((o1, o2) -> {
+                            SimpleNumber n1 = (SimpleNumber) o1;
+                            SimpleNumber n2 = (SimpleNumber) o2;
+                            Long difference = SimpleBoolean.toPrimitive((SimpleBoolean) finalAscending)
+                                    ? n1.getValue() - n2.getValue()
+                                    : n2.getValue() - n1.getValue();
+                            if (difference == 0) return 0;
+                            else if (difference > 0) return 1;
+                            else return -1;
+                        });
+                        return new SimpleList(numberList);
+                    } else { // complex sort
+                        List<List<Long>> sortingList = new ArrayList<>();
+                        for (SimpleObject element : ((SimpleList) list)) {
+                            Assert.True(element instanceof SimpleList).orThrows(TypeError.class, "Unable to sort non-list values");
+                            SimpleList elementList = ((SimpleList) element);
+                            List<Long> longList = new ArrayList<>();
+                            for (SimpleObject subelement : elementList) {
+                                Assert.True(subelement instanceof SimpleNumber).orThrows(TypeError.class, "Unable to sort non-number values");
+                                longList.add(((SimpleNumber) subelement).getValue());
+                            }
+                            sortingList.add(longList);
+                        }
+                        int criterionIndexNumber = (int)(long)((SimpleNumber) criterionIndex).getValue();
+                        SimpleObject finalAscending = ascending;
+                        sortingList.sort((o1, o2) -> {
+                            Assert.True(o1.size() > criterionIndexNumber
+                                    && o2.size() > criterionIndexNumber)
+                                    .orThrows(TypeError.class, "One of the inner lists is too short for <sort> function");
+                            Long l1 = o1.get(criterionIndexNumber);
+                            Long l2 = o2.get(criterionIndexNumber);
+                            Long difference = SimpleBoolean.toPrimitive((SimpleBoolean) finalAscending)
+                                    ? l1 - l2
+                                    : l2 - l1;
+                            if (difference == 0) return 0;
+                            else if (difference > 0) return 1;
+                            else return -1;
+                        });
+                        List<SimpleObject> resultList = new ArrayList<>();
+                        for (List<Long> element : sortingList) {
+                            List<SimpleObject> subList = new ArrayList<>();
+                            for (Long subelement : element) {
+                                subList.add(new SimpleNumber(subelement));
+                            }
+                            resultList.add(new SimpleList(subList));
+                        }
+                        return new SimpleList(resultList);
+                    }
+                })
+        );
     }
 
     private void runREPL() {

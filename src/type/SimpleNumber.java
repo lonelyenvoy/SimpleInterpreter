@@ -15,4 +15,13 @@ public class SimpleNumber extends SimpleObject {
         return String.valueOf(value);
     }
 
+    @Override
+    public boolean equals(Object object) {
+        return object instanceof SimpleNumber && this.getValue().equals(((SimpleNumber) object).getValue());
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
+    }
 }
