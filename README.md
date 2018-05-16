@@ -2,7 +2,7 @@
 
 [![auc][aucsvg]][auc] [![License][licensesvg]][license]
 
-[aucsvg]: https://img.shields.io/badge/SimpleInterpreter-v0.0.10_alpha-brightgreen.svg
+[aucsvg]: https://img.shields.io/badge/SimpleInterpreter-v0.0.11_alpha-brightgreen.svg
 [auc]: https://github.com/lonelyenvoy/SimpleInterpreter
 
 [licensesvg]: https://img.shields.io/badge/License-MIT-blue.svg
@@ -99,10 +99,16 @@ The last statement in ```do``` will be the return value.
 
 ```lisp
 (define alist (list 10 20 30))
-(first alist)                     ; 10
-(rest alist)                      ; (list 20 30)
-(append alist (list 40))          ; (list 10 20 30 40)
-(empty alist)                     ; false
+(first alist)                                         ; 10
+(rest alist)                                          ; (list 20 30)
+(append alist (list 40))                              ; (list 10 20 30 40)
+(empty alist)                                         ; false
+
+(sort alist true)                                     ; (list 10 20 30 40)
+(sort alist false)                                    ; (list 40 30 20 10)
+(define alist (list 1 30) (list 2 20) (list 3 10))
+(sort alist true 0)                                   ; (list (list 1 30) (list 2 20) (list 3 10))
+(sort alist true 1)                                   ; (list (list 3 10) (list 2 20) (list 1 30))
 ```
 
 **9. Other built-in functions:**
