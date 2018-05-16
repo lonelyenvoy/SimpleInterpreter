@@ -59,37 +59,53 @@
 
 (define scores 
   (list 
-    (+
-      (sum (get result12 0))
-      (sum (get result13 0))
-      (sum (get result14 0))
-      (sum (get result15 0))
+    (list
+      1
+      (+
+        (sum (get result12 0))
+        (sum (get result13 0))
+        (sum (get result14 0))
+        (sum (get result15 0))
+      )
     )
-    (+
-      (sum (get result12 1))
-      (sum (get result23 0))
-      (sum (get result24 0))
-      (sum (get result25 0))
+    (list
+      2
+      (+
+        (sum (get result12 1))
+        (sum (get result23 0))
+        (sum (get result24 0))
+        (sum (get result25 0))
+      )
     )
-    (+
-      (sum (get result13 1))
-      (sum (get result23 1))
-      (sum (get result34 0))
-      (sum (get result35 0))
+    (list
+      3
+      (+
+        (sum (get result13 1))
+        (sum (get result23 1))
+        (sum (get result34 0))
+        (sum (get result35 0))
+      )
     )
-    (+
-      (sum (get result14 1))
-      (sum (get result24 1))
-      (sum (get result34 1))
-      (sum (get result45 0))
+    (list
+      4
+      (+
+        (sum (get result14 1))
+        (sum (get result24 1))
+        (sum (get result34 1))
+        (sum (get result45 0))
+      )
     )
-    (+
-      (sum (get result15 1))
-      (sum (get result25 1))
-      (sum (get result35 1))
-      (sum (get result45 1))
+    (list
+      5
+      (+
+        (sum (get result15 1))
+        (sum (get result25 1))
+        (sum (get result35 1))
+        (sum (get result45 1))
+      )
     )
   )
 )
 
-(print scores)
+(print (map scores (function (x) (get x 1) )))
+(print (sort scores false 1))
