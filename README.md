@@ -152,6 +152,21 @@ BUILTINFUNC -> + | - | * | / | %
              | random | print
 ```
 
+Or more formally in BNF:
+```bnf
+<expr>                ::= <ID> | <NUMBER> | <boolean>
+                        | "(" <expr> ")"
+                        | "(" <keyword> <chain-expr> ")" | "(" <function> <chain-expr> ")"
+<chain-expr>          ::= <expr> | <expr> " " <chain-expr>
+<boolean>             ::= "true" | "false"
+<keyword>             ::= "if" | "define" | "do" | "function" | "list"
+<function>            ::= <builtin-function> | <CUSTOM-FUNCTION>
+<buildin-function>    ::= "+" | "-" | "*" | "/" | "%" 
+                        | "and" | "or" | "not" | "=" | "<" | ">" | "<=" | ">=" 
+                        | "first" | "rest" | "append" | "empty" | "sort" 
+                        | "random" | "print"
+```
+
 ## Contributing
 
 Any improvement or bug-fixing is welcome. Create a [pull request](https://github.com/lonelyenvoy/SimpleInterpreter/pulls) when you are done.
