@@ -1,6 +1,6 @@
 package exception;
 
-public class SyntaxError extends RuntimeException {
+public class SyntaxError extends SimpleRuntimeException {
     public SyntaxError(String message) {
         super("SyntaxError: " + message);
     }

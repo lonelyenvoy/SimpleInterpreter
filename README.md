@@ -2,7 +2,7 @@
 
 [![auc][aucsvg]][auc] [![License][licensesvg]][license]
 
-[aucsvg]: https://img.shields.io/badge/SimpleInterpreter-v0.0.11_alpha-brightgreen.svg
+[aucsvg]: https://img.shields.io/badge/SimpleInterpreter-v0.0.12_alpha-brightgreen.svg
 [auc]: https://github.com/lonelyenvoy/SimpleInterpreter
 
 [licensesvg]: https://img.shields.io/badge/License-MIT-blue.svg

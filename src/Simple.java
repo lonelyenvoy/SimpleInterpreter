@@ -194,9 +194,7 @@ public class Simple {
                             Long difference = SimpleBoolean.toPrimitive((SimpleBoolean) finalAscending)
                                     ? n1.getValue() - n2.getValue()
                                     : n2.getValue() - n1.getValue();
-                            if (difference == 0) return 0;
-                            else if (difference > 0) return 1;
-                            else return -1;
+                            return NumberUtils.makeTernary(difference);
                         });
                         return new SimpleList(numberList);
                     } else { // complex sort
@@ -222,9 +220,7 @@ public class Simple {
                             Long difference = SimpleBoolean.toPrimitive((SimpleBoolean) finalAscending)
                                     ? l1 - l2
                                     : l2 - l1;
-                            if (difference == 0) return 0;
-                            else if (difference > 0) return 1;
-                            else return -1;
+                            return NumberUtils.makeTernary(difference);
                         });
                         List<SimpleObject> resultList = new ArrayList<>();
                         for (List<Long> element : sortingList) {

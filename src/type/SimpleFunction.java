@@ -43,9 +43,9 @@ public class SimpleFunction extends SimpleObject {
                 Arrays.stream(parameters)
                         .map(param -> scope.findLazily(param))
                         .filter(Objects::nonNull);
-        List<SimpleObject> newArguments =
-                Stream.concat(existingArguments, Arrays.stream(arguments)).collect(Collectors.toList());
-        SimpleScope newScope = scope.getParent().spawnScopeWithVariables(parameters, newArguments.toArray(new SimpleObject[0]));
+        SimpleObject[] newArguments =
+                Stream.concat(existingArguments, Arrays.stream(arguments)).toArray(SimpleObject[]::new);
+        SimpleScope newScope = scope.getParent().spawnScopeWithVariables(parameters, newArguments);
         return new SimpleFunction(body, parameters, newScope);
     }
 
@@ -65,7 +65,7 @@ public class SimpleFunction extends SimpleObject {
                 String.join(
                         " ",
                         Arrays.stream(parameters).map(parameter -> {
-                            SimpleObject value = null;
+                            SimpleObject value;
                             if ((value = scope.findLazily(parameter)) != null) {
                                 return parameter + ":" + value;
                             }

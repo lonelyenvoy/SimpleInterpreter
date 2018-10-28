@@ -27,7 +27,7 @@ public class SimpleScope {
 
     public SimpleScope(SimpleScope parent) {
         this.parent = parent;
-        this.variableTable = new HashMap<String, SimpleObject>();
+        this.variableTable = new HashMap<>();
     }
 
     public SimpleScope buildIn(String name, BiFunction<SimpleExpression[], SimpleScope, SimpleObject> builtinFunction) {
@@ -73,23 +73,24 @@ public class SimpleScope {
                           boolean showPrompts,
                           boolean showResults) {
         Scanner scanner = new Scanner(inputStream);
-        String code = "";
+        StringBuilder code = new StringBuilder();
         while (true) {
             try {
-                if (showPrompts) System.out.print(code.equals("") ? ">>> " : "... ");
+                if (showPrompts) System.out.print(code.length() == 0 ? ">>> " : "... ");
                 if (!scanner.hasNextLine()) {
                     break;
                 }
-                code += scanner.nextLine();
-                if (!code.trim().equals("")) {
-                    code += "\n";
-                    SimpleExpressionStatus status = check.apply(code);
+                code.append(scanner.nextLine());
+                if (!code.toString().trim().equals("")) {
+                    code.append('\n');
+                    String codeString = code.toString();
+                    SimpleExpressionStatus status = check.apply(codeString);
                     if (status == SimpleExpressionStatus.OK) {
-                        SimpleObject result = evaluate.apply(code, this);
+                        SimpleObject result = evaluate.apply(codeString, this);
                         if (showResults && result != null) {
                             System.out.println(result);
                         }
-                        code = "";
+                        code.setLength(0); // clear
                     } else if (status == SimpleExpressionStatus.INVALID) {
                         throw new SyntaxError("Invalid expression");
                     }
@@ -98,7 +99,7 @@ public class SimpleScope {
                 }
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                code = "";
+                code.setLength(0); // clear
             }
         }
     }

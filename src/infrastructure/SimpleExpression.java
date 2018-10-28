@@ -1,13 +1,13 @@
 package infrastructure;
 
-import exception.ReferenceError;
-import exception.RuntimeInternalError;
 import type.*;
 import util.PrettyPrintUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static util.PrettyPrintUtils.println;
 
 public class SimpleExpression {
     private String value;
@@ -31,52 +31,62 @@ public class SimpleExpression {
     }
 
     /**
-     * Last updated in version: v-0.0.10 alpha
+     * Last updated in version: v-0.0.12 alpha
      */
     public SimpleObject evaluate(SimpleScope scope) {
         SimpleExpression current = this;
         while (true) {
-            if (current.children.size() == 0) {
-                try {
+            if (current.children.size() == 0) { // can be an id, a SimpleNumber or a SimpleBoolean
+                try { // parse as a SimpleNumber
                     return new SimpleNumber(Long.parseLong(current.value));
-                } catch (NumberFormatException ex) {
+                } catch (NumberFormatException ex) { // parse as a SimpleBoolean
                     if (current.value.equals("false")) {
                         return SimpleBoolean.False;
                     } else if (current.value.equals("true")) {
                         return SimpleBoolean.True;
                     } else {
-                        return scope.find(current.value);
+                        return scope.find(current.value); // parse as an id
                     }
                 }
-            } else {
+            } else { // can be a SimpleFunction or a SimpleList
                 SimpleExpression first = current.children.get(0);
-                if (first.value.equals("if")) {
+                if (first.value.equals("if")) { // keyword if
                     // TODO check children
                     SimpleBoolean condition = SimpleBoolean.valueOf(current.children.get(1).evaluate(scope));
-                    return condition == SimpleBoolean.True ? current.children.get(2).evaluate(scope) : current.children.get(3).evaluate(scope);
-                } else if (first.value.equals("define")) {
-                    return scope.define(current.children.get(1).value, current.children.get(2).evaluate(new SimpleScope(scope)));
-                } else if (first.value.equals("do")) {
+                    return condition == SimpleBoolean.True
+                            ? current.children.get(2).evaluate(scope)
+                            : current.children.get(3).evaluate(scope);
+                } else if (first.value.equals("define")) { // keyword define
+                    return scope.define(current.children.get(1).value,
+                            current.children.get(2).evaluate(new SimpleScope(scope)));
+                } else if (first.value.equals("do")) { // keyword do
                     SimpleObject result = null;
                     for (SimpleExpression expr : current.children.stream().skip(1).collect(Collectors.toList())) {
                         result = expr.evaluate(scope);
                     }
                     return result;
-                } else if (first.value.equals("function")) {
+                } else if (first.value.equals("function")) { // SimpleFunction
                     SimpleExpression body = current.children.get(2);
-                    List<String> params = current.children.get(1).children.stream().map(expr -> expr.value).collect(Collectors.toList());
-                    return new SimpleFunction(body, params.toArray(new String[0]), new SimpleScope(scope));
-                } else if (first.value.equals("list")) {
+                    String[] params = current.children.get(1).children.stream()
+                            .map(expr -> expr.value).toArray(String[]::new);
+                    return new SimpleFunction(body, params, new SimpleScope(scope));
+                } else if (first.value.equals("list")) { // SimpleList
                     SimpleScope finalScope = scope;
-                    return new SimpleList(current.children.stream().skip(1).map(expr -> expr.evaluate(finalScope)).collect(Collectors.toList()));
-                } else if (SimpleScope.getBuiltinFunctions().containsKey(first.value)) {
-                    List<SimpleExpression> args = current.children.stream().skip(1).collect(Collectors.toList());
-                    return SimpleScope.getBuiltinFunctions().get(first.value).apply(args.toArray(new SimpleExpression[0]), scope);
-                } else {
-                    SimpleFunction function = first.value.equals("(") ? (SimpleFunction) first.evaluate(scope) : (SimpleFunction) scope.find(first.value);
+                    return new SimpleList(
+                            current.children.stream()
+                                    .skip(1).map(expr -> expr.evaluate(finalScope))
+                                    .collect(Collectors.toList()));
+                } else if (SimpleScope.getBuiltinFunctions().containsKey(first.value)) { // built-in functions
+                    SimpleExpression[] args = current.children.stream().skip(1).toArray(SimpleExpression[]::new);
+                    return SimpleScope.getBuiltinFunctions().get(first.value).apply(args, scope);
+                } else { // custom functions
+                    SimpleFunction function = first.value.equals("(")
+                            ? (SimpleFunction) first.evaluate(scope)
+                            : (SimpleFunction) scope.find(first.value);
                     SimpleScope finalScope = scope;
-                    List<SimpleObject> arguments = current.children.stream().skip(1).map(expr -> expr.evaluate(finalScope)).collect(Collectors.toList());
-                    SimpleFunction newFunction = function.update(arguments.toArray(new SimpleObject[0]));
+                    SimpleObject[] arguments = current.children.stream()
+                            .skip(1).map(expr -> expr.evaluate(finalScope)).toArray(SimpleObject[]::new);
+                    SimpleFunction newFunction = function.update(arguments);
                     if (newFunction.isPartial()) {
                         return newFunction.evaluate();
                     } else {
@@ -89,59 +99,59 @@ public class SimpleExpression {
     }
 
     /**
-     * Last updated in version: v-0.0.10 alpha
+     * Last updated in version: v-0.0.12 alpha
      */
     public void doSyntaxAnalysis(int depth) {
         if (children.size() == 0) {
             try {
                 Long.parseLong(value);
-                PrettyPrintUtils.println("Number: " + value, depth);
+                println("Number: " + value, depth);
             } catch (NumberFormatException ex) {
                 if (value.equals("false") || value.equals("true")) {
-                    PrettyPrintUtils.println("Boolean: " + value, depth);
+                    println("Boolean: " + value, depth);
                 } else {
-                    PrettyPrintUtils.println("Id: " + value, depth);
+                    println("Id: " + value, depth);
                 }
             }
         } else {
             SimpleExpression first = children.get(0);
             if (first.value.equals("if")) {
-                PrettyPrintUtils.println("Keyword: " + first, depth);
-                PrettyPrintUtils.println("Condition: ", depth);
+                println("Keyword: " + first, depth);
+                println("Condition: ", depth);
                 children.get(1).doSyntaxAnalysis(depth + 1);
-                PrettyPrintUtils.println("If-True: ", depth);
+                println("If-True: ", depth);
                 children.get(2).doSyntaxAnalysis(depth + 1);
-                PrettyPrintUtils.println("If-False: ", depth);
+                println("If-False: ", depth);
                 children.get(3).doSyntaxAnalysis(depth + 1);
             } else if (first.value.equals("define")) {
-                PrettyPrintUtils.println("Keyword: " + first, depth);
-                PrettyPrintUtils.println("Id: " + children.get(1), depth);
-                PrettyPrintUtils.println("Value: ", depth);
+                println("Keyword: " + first, depth);
+                println("Id: " + children.get(1), depth);
+                println("Value: ", depth);
                 children.get(2).doSyntaxAnalysis(depth + 1);
             } else if (first.value.equals("do")) {
-                PrettyPrintUtils.println("Keyword: " + first, depth);
+                println("Keyword: " + first, depth);
                 for (SimpleExpression expr : children.stream().skip(1).collect(Collectors.toList())) {
                     expr.doSyntaxAnalysis(depth + 1);
                 }
             } else if (first.value.equals("function")) {
-                PrettyPrintUtils.println("Keyword: " + first, depth);
+                println("Keyword: " + first, depth);
                 PrettyPrintUtils.print("Arguments: ", depth);
                 for (String arg : children.get(1).children.stream().map(expr -> expr.value).collect(Collectors.toList())) {
                     PrettyPrintUtils.print(arg + " ", 0);
                 }
-                PrettyPrintUtils.println("", depth);
-                PrettyPrintUtils.println("Body: ", depth);
+                println("", depth);
+                println("Body: ", depth);
                 children.get(2).doSyntaxAnalysis(depth + 1);
             } else if (first.value.equals("list")) {
-                PrettyPrintUtils.println("Keyword: " + first, depth);
+                println("Keyword: " + first, depth);
                 children.stream().skip(1).forEach(expr -> expr.doSyntaxAnalysis(depth + 1));
             } else if (SimpleScope.getBuiltinFunctions().containsKey(first.value)) {
-                PrettyPrintUtils.println("Function: " + first, depth);
-                PrettyPrintUtils.println("Arguments: ", depth);
+                println("Function: " + first, depth);
+                println("Arguments: ", depth);
                 children.stream().skip(1).forEach(expr -> expr.doSyntaxAnalysis(depth + 1));
             } else {
-                PrettyPrintUtils.println("Function: " + first, depth);
-                PrettyPrintUtils.println("Arguments: ", depth);
+                println("Function: " + first, depth);
+                println("Arguments: ", depth);
                 children.stream().skip(1).forEach(expr -> expr.doSyntaxAnalysis(depth + 1));
             }
         }
