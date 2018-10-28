@@ -161,7 +161,7 @@ Or more formally in BNF:
 <boolean>             ::= "true" | "false"
 <keyword>             ::= "if" | "define" | "do" | "function" | "list"
 <function>            ::= <builtin-function> | <CUSTOM-FUNCTION>
-<buildin-function>    ::= "+" | "-" | "*" | "/" | "%" 
+<builtin-function>    ::= "+" | "-" | "*" | "/" | "%" 
                         | "and" | "or" | "not" | "=" | "<" | ">" | "<=" | ">=" 
                         | "first" | "rest" | "append" | "empty" | "sort" 
                         | "random" | "print"
