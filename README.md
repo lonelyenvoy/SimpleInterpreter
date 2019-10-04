@@ -13,7 +13,7 @@ An interpreter for Simple language.
 ## Introduction
 
 Simple © is a user-friendly high-level functional programing language running on JVM,
-letting you build greater system with less code.
+letting you build better systems with less code.
 
 ## Usage
 
