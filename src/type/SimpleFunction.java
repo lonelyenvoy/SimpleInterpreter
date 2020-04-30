@@ -9,10 +9,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class SimpleFunction extends SimpleObject {
-    private SimpleExpression body;
-    private String[] parameters;
-    private SimpleScope scope;
+public final class SimpleFunction extends SimpleObject {
+    private final SimpleExpression body;
+    private final String[] parameters;
+    private final SimpleScope scope;
 
     public SimpleExpression getBody() {
         return body;
@@ -24,10 +24,14 @@ public class SimpleFunction extends SimpleObject {
         return scope;
     }
 
-    public SimpleFunction(SimpleExpression body, String[] parameters, SimpleScope scope) {
+    private SimpleFunction(SimpleExpression body, String[] parameters, SimpleScope scope) {
         this.body = body;
         this.parameters = parameters;
         this.scope = scope;
+    }
+
+    public static SimpleFunction of(SimpleExpression body, String[] parameters, SimpleScope scope) {
+        return new SimpleFunction(body, parameters, scope);
     }
 
     public SimpleObject evaluate() {
@@ -41,12 +45,12 @@ public class SimpleFunction extends SimpleObject {
     public SimpleFunction update(SimpleObject[] arguments) {
         Stream<SimpleObject> existingArguments =
                 Arrays.stream(parameters)
-                        .map(param -> scope.findLazily(param))
+                        .map(scope::findLazily)
                         .filter(Objects::nonNull);
         SimpleObject[] newArguments =
                 Stream.concat(existingArguments, Arrays.stream(arguments)).toArray(SimpleObject[]::new);
         SimpleScope newScope = scope.getParent().spawnScopeWithVariables(parameters, newArguments);
-        return new SimpleFunction(body, parameters, newScope);
+        return SimpleFunction.of(body, parameters, newScope);
     }
 
     private List<String> computeFilledParameters() {

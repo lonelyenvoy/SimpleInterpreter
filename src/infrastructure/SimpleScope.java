@@ -14,9 +14,9 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class SimpleScope {
-    private SimpleScope parent;
-    private Map<String, SimpleObject> variableTable;
-    private static Map<String, BiFunction<SimpleExpression[], SimpleScope, SimpleObject>> builtinFunctions = new HashMap<>();
+    private final SimpleScope parent;
+    private final Map<String, SimpleObject> variableTable;
+    private final static Map<String, BiFunction<SimpleExpression[], SimpleScope, SimpleObject>> builtinFunctions = new HashMap<>();
 
     public SimpleScope getParent() {
         return parent;
@@ -25,9 +25,17 @@ public class SimpleScope {
         return builtinFunctions;
     }
 
-    public SimpleScope(SimpleScope parent) {
+    private SimpleScope(SimpleScope parent) {
         this.parent = parent;
         this.variableTable = new HashMap<>();
+    }
+
+    public static SimpleScope of(SimpleScope parent) {
+        return new SimpleScope(parent);
+    }
+
+    public static SimpleScope ofRoot() {
+        return new SimpleScope(null);
     }
 
     public SimpleScope buildIn(String name, BiFunction<SimpleExpression[], SimpleScope, SimpleObject> builtinFunction) {

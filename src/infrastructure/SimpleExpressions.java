@@ -10,17 +10,17 @@ public class SimpleExpressions {
     }
 
     public static SimpleExpression parse(String code) {
-        SimpleExpression program = new SimpleExpression("", null);
+        SimpleExpression program = SimpleExpression.ofRoot();
         SimpleExpression current = program;
         for (String lex : SimpleTokenizer.tokenize(code)) {
             if (lex.equals("(")) {
-                SimpleExpression newNode = new SimpleExpression("(", current);
+                SimpleExpression newNode = SimpleExpression.of("(", current);
                 current.getChildren().add(newNode);
                 current = newNode;
             } else if (lex.equals(")")) {
                 current = current.getParent();
             } else {
-                current.getChildren().add(new SimpleExpression(lex, current));
+                current.getChildren().add(SimpleExpression.of(lex, current));
             }
         }
         return program.getChildren().get(0);

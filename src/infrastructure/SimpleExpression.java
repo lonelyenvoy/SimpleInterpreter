@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 import static util.PrettyPrintUtils.println;
 
 public class SimpleExpression {
-    private String value;
-    private List<SimpleExpression> children;
-    private SimpleExpression parent;
+    private final String value;
+    private final List<SimpleExpression> children;
+    private final SimpleExpression parent;
 
     public String getValue() {
         return value;
@@ -24,25 +24,33 @@ public class SimpleExpression {
         return parent;
     }
 
-    public SimpleExpression(String value, SimpleExpression parent) {
+    private SimpleExpression(String value, SimpleExpression parent) {
         this.value = value;
         this.children = new ArrayList<>();
         this.parent = parent;
     }
 
+    public static SimpleExpression of(String value, SimpleExpression parent) {
+        return new SimpleExpression(value, parent);
+    }
+
+    public static SimpleExpression ofRoot() {
+        return new SimpleExpression("", null);
+    }
+
     /**
-     * Last updated in version: v-0.0.12 alpha
+     * Last updated in version: v-0.0.13 alpha
      */
     public SimpleObject evaluate(SimpleScope scope) {
         SimpleExpression current = this;
         while (true) {
             if (current.children.size() == 0) { // can be an id, a SimpleNumber or a SimpleBoolean
                 try { // parse as a SimpleNumber
-                    return new SimpleNumber(Long.parseLong(current.value));
+                    return SimpleNumber.of(Long.parseLong(current.value));
                 } catch (NumberFormatException ex) { // parse as a SimpleBoolean
-                    if (current.value.equals("false")) {
+                    if (current.value.equals(SimpleKeyword.FALSE.getLiteral())) {
                         return SimpleBoolean.False;
-                    } else if (current.value.equals("true")) {
+                    } else if (current.value.equals(SimpleKeyword.TRUE.getLiteral())) {
                         return SimpleBoolean.True;
                     } else {
                         return scope.find(current.value); // parse as an id
@@ -50,29 +58,29 @@ public class SimpleExpression {
                 }
             } else { // can be a SimpleFunction or a SimpleList
                 SimpleExpression first = current.children.get(0);
-                if (first.value.equals("if")) { // keyword if
+                if (first.value.equals(SimpleKeyword.IF.getLiteral())) { // keyword if
                     // TODO check children
                     SimpleBoolean condition = SimpleBoolean.valueOf(current.children.get(1).evaluate(scope));
                     return condition == SimpleBoolean.True
                             ? current.children.get(2).evaluate(scope)
                             : current.children.get(3).evaluate(scope);
-                } else if (first.value.equals("define")) { // keyword define
+                } else if (first.value.equals(SimpleKeyword.DEFINE.getLiteral())) { // keyword define
                     return scope.define(current.children.get(1).value,
-                            current.children.get(2).evaluate(new SimpleScope(scope)));
-                } else if (first.value.equals("do")) { // keyword do
+                            current.children.get(2).evaluate(SimpleScope.of(scope)));
+                } else if (first.value.equals(SimpleKeyword.DO.getLiteral())) { // keyword do
                     SimpleObject result = null;
                     for (SimpleExpression expr : current.children.stream().skip(1).collect(Collectors.toList())) {
                         result = expr.evaluate(scope);
                     }
                     return result;
-                } else if (first.value.equals("function")) { // SimpleFunction
+                } else if (first.value.equals(SimpleKeyword.FUNCTION.getLiteral())) { // SimpleFunction
                     SimpleExpression body = current.children.get(2);
                     String[] params = current.children.get(1).children.stream()
                             .map(expr -> expr.value).toArray(String[]::new);
-                    return new SimpleFunction(body, params, new SimpleScope(scope));
-                } else if (first.value.equals("list")) { // SimpleList
+                    return SimpleFunction.of(body, params, SimpleScope.of(scope));
+                } else if (first.value.equals(SimpleKeyword.LIST.getLiteral())) { // SimpleList
                     SimpleScope finalScope = scope;
-                    return new SimpleList(
+                    return SimpleList.of(
                             current.children.stream()
                                     .skip(1).map(expr -> expr.evaluate(finalScope))
                                     .collect(Collectors.toList()));

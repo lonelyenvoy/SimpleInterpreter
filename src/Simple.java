@@ -59,9 +59,9 @@ public class Simple {
     }
 
     private static Simple createEnvironment() {
-        return new Simple(new SimpleScope(null)
+        return new Simple(SimpleScope.ofRoot()
                 .buildIn("+", (args, scope) ->
-                        new SimpleNumber(Arrays.stream(args)
+                        SimpleNumber.of(Arrays.stream(args)
                                 .map(expr -> expr.evaluate(scope))
                                 .map(SimpleObject::toNumber)
                                 .mapToLong(SimpleNumber::getValue)
@@ -73,12 +73,12 @@ public class Simple {
                             .map(SimpleObject::toNumber).collect(Collectors.toList());
                     long firstValue = numbers.get(0).getValue();
                     if (numbers.size() == 1) {
-                        return new SimpleNumber(-firstValue);
+                        return SimpleNumber.of(-firstValue);
                     }
-                    return new SimpleNumber(firstValue - numbers.stream().skip(1).mapToLong(SimpleNumber::getValue).sum());
+                    return SimpleNumber.of(firstValue - numbers.stream().skip(1).mapToLong(SimpleNumber::getValue).sum());
                 })
                 .buildIn("*", (args, scope) ->
-                        new SimpleNumber(Arrays.stream(args)
+                        SimpleNumber.of(Arrays.stream(args)
                                 .map(expr -> expr.evaluate(scope))
                                 .map(SimpleObject::toNumber)
                                 .mapToLong(SimpleNumber::getValue)
@@ -89,14 +89,14 @@ public class Simple {
                             .map(expr -> expr.evaluate(scope))
                             .map(SimpleObject::toNumber).collect(Collectors.toList());
                     long firstValue = numbers.get(0).getValue();
-                    return new SimpleNumber(firstValue / numbers.stream().skip(1).mapToLong(SimpleNumber::getValue).reduce(1, (x, y) -> x * y));
+                    return SimpleNumber.of(firstValue / numbers.stream().skip(1).mapToLong(SimpleNumber::getValue).reduce(1, (x, y) -> x * y));
                 })
                 .buildIn("%", (args, scope) -> {
                     Assert.True(args.length == 2).orThrows(TypeError.class, "<mod> function only accepts 2 params");
                     List<SimpleNumber> numbers = Arrays.stream(args)
                             .map(expr -> expr.evaluate(scope))
                             .map(SimpleObject::toNumber).collect(Collectors.toList());
-                    return new SimpleNumber(numbers.get(0).getValue() % numbers.get(1).getValue());
+                    return SimpleNumber.of(numbers.get(0).getValue() % numbers.get(1).getValue());
                 })
                 .buildIn("and", (args, scope) -> {
                     Assert.True(args.length != 0).orThrows(TypeError.class, "<and> function does not accept 0 params");
@@ -124,7 +124,7 @@ public class Simple {
                 })
                 .buildIn("rest", (args, scope) -> {
                     SimpleList list = SimpleListUtils.retrieve(args, scope, "rest");
-                    return new SimpleList(StreamSupport.stream(list.spliterator(), false).skip(1).collect(Collectors.toList()));
+                    return SimpleList.of(StreamSupport.stream(list.spliterator(), false).skip(1).collect(Collectors.toList()));
                 })
                 .buildIn("append", (args, scope) -> {
                     SimpleObject obj0 = null, obj1 = null;
@@ -135,7 +135,7 @@ public class Simple {
                             .orThrows(TypeError.class, "<append> function only accepts 2 lists");
                     SimpleList list0 = (SimpleList) obj0,
                             list1 = (SimpleList) obj1;
-                    return new SimpleList(
+                    return SimpleList.of(
                             Stream.concat(
                                     StreamSupport.stream(list0.spliterator(), false),
                                     StreamSupport.stream(list1.spliterator(), false))
@@ -162,7 +162,7 @@ public class Simple {
                     Assert
                             .True(low instanceof SimpleNumber && high instanceof SimpleNumber)
                             .orThrows(TypeError.class, "<random> function only accepts number params");
-                    return new SimpleNumber(ThreadLocalRandom.current().nextLong(
+                    return SimpleNumber.of(ThreadLocalRandom.current().nextLong(
                             ((SimpleNumber) low).getValue(), ((SimpleNumber) high).getValue() + 1));
                 })
                 .buildIn("sort", (args, scope) -> {
@@ -196,7 +196,7 @@ public class Simple {
                                     : n2.getValue() - n1.getValue();
                             return NumberUtils.makeTernary(difference);
                         });
-                        return new SimpleList(numberList);
+                        return SimpleList.of(numberList);
                     } else { // complex sort
                         List<List<Long>> sortingList = new ArrayList<>();
                         for (SimpleObject element : ((SimpleList) list)) {
@@ -226,11 +226,11 @@ public class Simple {
                         for (List<Long> element : sortingList) {
                             List<SimpleObject> subList = new ArrayList<>();
                             for (Long subelement : element) {
-                                subList.add(new SimpleNumber(subelement));
+                                subList.add(SimpleNumber.of(subelement));
                             }
-                            resultList.add(new SimpleList(subList));
+                            resultList.add(SimpleList.of(subList));
                         }
-                        return new SimpleList(resultList);
+                        return SimpleList.of(resultList);
                     }
                 })
         );

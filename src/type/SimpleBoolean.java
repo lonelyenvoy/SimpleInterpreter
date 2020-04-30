@@ -2,7 +2,7 @@ package type;
 
 import exception.RuntimeInternalError;
 
-public class SimpleBoolean extends SimpleObject {
+public final class SimpleBoolean extends SimpleObject {
     public static final SimpleBoolean False = new SimpleBoolean();
     public static final SimpleBoolean True = new SimpleBoolean();
 

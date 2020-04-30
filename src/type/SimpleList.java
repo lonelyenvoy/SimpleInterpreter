@@ -4,11 +4,15 @@ import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-public class SimpleList extends SimpleObject implements Iterable<SimpleObject> {
+public final class SimpleList extends SimpleObject implements Iterable<SimpleObject> {
     private final Iterable<SimpleObject> values;
 
-    public SimpleList(Iterable<SimpleObject> values) {
+    private SimpleList(Iterable<SimpleObject> values) {
         this.values = values;
+    }
+
+    public static SimpleList of(Iterable<SimpleObject> values) {
+        return new SimpleList(values);
     }
 
     @Override
